@@ -3,7 +3,7 @@ namespace PhpSpec\Lumen\Extension;
 
 use InvalidArgumentException;
 use PhpSpec\ServiceContainer;
-use PhpSpec\Extension\ExtensionInterface;
+use PhpSpec\Extension;
 use PhpSpec\Lumen\Listener\LumenListener;
 use PhpSpec\Lumen\Runner\Maintainer\LumenMaintainer;
 use PhpSpec\Lumen\Runner\Maintainer\PresenterMaintainer;
@@ -14,19 +14,20 @@ use PhpSpec\Lumen\Util\Lumen;
  *
  * Bootstraps Lumen and sets up some objects in the Container.
  */
-class LumenExtension implements ExtensionInterface
+class LumenExtension implements Extension
 {
     /**
      * Setup the Lumen extension.
      *
      * @param  \PhpSpec\ServiceContainer $container
+     * @param  array $params
      * @return void
      */
-    public function load(ServiceContainer $container)
+    public function load(ServiceContainer $container, array $params)
     {
         // Create & store Lumen wrapper
 
-        $container->setShared(
+        $container->define(
             'lumen',
             function ($c) {
                 $config = $c->getParam('lumen_extension');
@@ -44,7 +45,7 @@ class LumenExtension implements ExtensionInterface
 
         // Bootstrap maintainer to bind Lumen wrapper to specs
 
-        $container->setShared(
+        $container->define(
             'runner.maintainers.lumen',
             function ($c) {
                 return new LumenMaintainer(
@@ -56,7 +57,7 @@ class LumenExtension implements ExtensionInterface
         // Bootstrap maintainer to bind app Presenter to specs, so it
         // can be passed to custom matchers
 
-        $container->setShared(
+        $container->define(
             'runner.maintainers.presenter',
             function ($c) {
                 return new PresenterMaintainer(
@@ -67,7 +68,7 @@ class LumenExtension implements ExtensionInterface
 
         // Bootstrap listener to setup Lumen application for specs
 
-        $container->setShared(
+        $container->define(
             'event_dispatcher.listeners.lumen',
             function ($c) {
                 return new LumenListener($c->get('lumen'));
